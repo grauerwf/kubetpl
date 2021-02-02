@@ -3,6 +3,7 @@
 import argparse
 import yaml
 import os
+import sys
 from jinja2 import Template
 
 
@@ -25,7 +26,7 @@ def parse_args():
     group.add_argument('-i', '--include', dest='include', action='append', help='Resource sets to include explicitly', default=[])
     group.add_argument('-e', '--exclude', dest='exclude', action='append', help='Resource sets to exclude explicitly', default=[])
     parser.add_argument('--var', dest='vars', action='append', help='Provide variables to templates explicitly')
-    parser.add_argument('--kubectl', dest='kubectl_path', help='Path to the kubectl binary (default "kubectl")')
+    parser.add_argument('--kubectl', dest='kubectl_path', help='Path to the kubectl binary (default "kubectl")', default='kubectl')
 
     parser.add_argument('command', help='Template resource sets and pass to "kubectl <command>"')
     parser.add_argument('file',  help='Resource Set to templating')
@@ -42,9 +43,7 @@ def template_resources(resources_list, values):
         if os.path.isfile(resource):
             resources_to_template.append(resource)
         elif os.path.isdir(resource):
-            resources_to_template.extend([str(os.path.sep).join([resource, file]) for file in os.listdir(resource) if file.endswith(".yml")])
-            resources_to_template.extend([str(os.path.sep).join([resource, file]) for file in os.listdir(resource) if file.endswith(".yaml")])
-            resources_to_template.extend([str(os.path.sep).join([resource, file]) for file in os.listdir(resource) if file.endswith(".json")])
+            resources_to_template.extend([str(os.path.sep).join([resource, file]) for file in os.listdir(resource) if file.endswith(".yml") or file.endswith(".yaml") or file.endswith(".json")])
     for resource in resources_to_template:
         with open(resource) as template_file:
             template = Template(template_file.read())
@@ -55,9 +54,9 @@ def template_resources(resources_list, values):
 def main():
     resources_to_template = []
     args = parse_args()
-    # if len(args.include) > 0 and len(args.exclude) > 0:
     with open(args.file) as resource_set_file:
         resource_set = yaml.load(resource_set_file.read(), Loader=yaml.SafeLoader)
+    tpl_vars = resource_set['global']
     resource_set_resources = list(get_resource_list(resource_set['include']))
     if len(args.include) > 0:
         for resource in resource_set_resources:
@@ -69,12 +68,14 @@ def main():
                 resources_to_template.append(resource)
     else:
         resources_to_template = resource_set_resources
-    templated_resources = template_resources(resources_to_template, resource_set['global'])
+    for var in args.vars:
+        (var_key, var_value) = var.split('=')
+        tpl_vars[var_key] = var_value
+    templated_resources = template_resources(resources_to_template, tpl_vars)
     if args.command == 'template':
         print(templated_resources)
     else:
-        # print('echo {0} | kubectl {1} -f -'.format(templated_resources, args.command))
-        os.system('echo "{0}" | kubectl {1} -f -'.format(templated_resources, args.command))
+        os.system('echo "{0}" | {1} {2} -f -'.format(templated_resources, args.kubectl_path, args.command))
 
 
 if __name__ == '__main__':
