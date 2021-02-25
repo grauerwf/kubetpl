@@ -1,1 +1,1 @@
-# kubtemplate
+# kubetpl
