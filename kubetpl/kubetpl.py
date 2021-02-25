@@ -75,7 +75,11 @@ def main():
     if args.command == 'template':
         print(templated_resources)
     else:
-        os.system('echo "{0}" | {1} {2} -f -'.format(templated_resources, args.kubectl_path, args.command))
+        kubectl_command_tpl = 'echo "{0}" | {1} {2} --context {3} -f -'
+        os.system(kubectl_command_tpl.format(templated_resources,
+                                             args.kubectl_path,
+                                             args.command,
+                                             resource_set['context']))
 
 
 if __name__ == '__main__':
