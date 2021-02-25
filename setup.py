@@ -15,7 +15,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     entry_points={
         'console_scripts': [
-            'kubtemplate=kubtemplate.kubtemplate:main',
+            'kubetpl=kubetpl.kubetpl:main',
         ],
     },
     classifiers=[
