@@ -1,11 +1,12 @@
 import setuptools
+import os
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="kubetpl",
-    version="1.0.0",
+    version=os.getenv('GITHUB_REF'),
     author="Grauer W01f",
     author_email="grauerwf@gmail.com",
     description="A templater for kubernetes resources",
