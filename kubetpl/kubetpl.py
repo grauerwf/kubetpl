@@ -23,13 +23,33 @@ def get_resource_list(resource_map):
 def parse_args():
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('-i', '--include', dest='include', action='append', help='Resource sets to include explicitly', default=[])
-    group.add_argument('-e', '--exclude', dest='exclude', action='append', help='Resource sets to exclude explicitly', default=[])
-    parser.add_argument('--var', dest='vars', action='append', help='Provide variables to templates explicitly')
-    parser.add_argument('--kubectl', dest='kubectl_path', help='Path to the kubectl binary (default "kubectl")', default='kubectl')
+    group.add_argument('-i',
+                       '--include',
+                       dest='include',
+                       action='append',
+                       help='Resource sets to include explicitly',
+                       default=[])
+    group.add_argument('-e',
+                       '--exclude',
+                       dest='exclude',
+                       action='append',
+                       help='Resource sets to exclude explicitly',
+                       default=[])
+    parser.add_argument('--var',
+                        dest='vars',
+                        action='append',
+                        help='Provide variables to templates explicitly',
+                        default=[])
+    parser.add_argument('--kubectl',
+                        dest='kubectl_path',
+                        help='Path to the kubectl binary (default "kubectl")',
+                        default='kubectl')
 
-    parser.add_argument('command', help='Template resource sets and pass to "kubectl <command>"')
-    parser.add_argument('file',  help='Resource Set to templating')
+    parser.add_argument('command',
+                        help='Template resourceset'
+                             ' and pass to "kubectl <command>"')
+    parser.add_argument('file',
+                        help='Resource Set to templating')
 
     return parser.parse_args()
 
@@ -43,7 +63,12 @@ def template_resources(resources_list, values):
         if os.path.isfile(resource):
             resources_to_template.append(resource)
         elif os.path.isdir(resource):
-            resources_to_template.extend([str(os.path.sep).join([resource, file]) for file in os.listdir(resource) if file.endswith(".yml") or file.endswith(".yaml") or file.endswith(".json")])
+            resources_to_template.extend(
+                [str(os.path.sep).join([resource, file])
+                 for file in os.listdir(resource)
+                 if file.endswith(".yml")
+                 or file.endswith(".yaml")
+                 or file.endswith(".json")])
     for resource in resources_to_template:
         with open(resource) as template_file:
             template = Template(template_file.read())
@@ -55,7 +80,8 @@ def main():
     resources_to_template = []
     args = parse_args()
     with open(args.file) as resource_set_file:
-        resource_set = yaml.load(resource_set_file.read(), Loader=yaml.SafeLoader)
+        resource_set = yaml.load(resource_set_file.read(),
+                                 Loader=yaml.SafeLoader)
     tpl_vars = resource_set['global']
     resource_set_resources = list(get_resource_list(resource_set['include']))
     if len(args.include) > 0:
