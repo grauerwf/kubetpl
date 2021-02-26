@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="kubetpl",
-    version=os.getenv('GITHUB_REF'),
+    version=os.getenv('GITHUB_REF').replace('refs-tags-', ''),
     author="Grauer W01f",
     author_email="grauerwf@gmail.com",
     description="A templater for kubernetes resources",
