@@ -19,6 +19,10 @@ setuptools.setup(
             'kubetpl=kubetpl.kubetpl:main',
         ],
     },
+    install_requires=[
+        'Jinja2',
+        'PyYAML'
+    ],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
