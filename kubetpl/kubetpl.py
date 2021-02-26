@@ -68,9 +68,10 @@ def main():
                 resources_to_template.append(resource)
     else:
         resources_to_template = resource_set_resources
-    for var in args.vars:
-        (var_key, var_value) = var.split('=')
-        tpl_vars[var_key] = var_value
+    if len(args.vars) > 0:
+        for var in args.vars:
+            (var_key, var_value) = var.split('=')
+            tpl_vars[var_key] = var_value
     templated_resources = template_resources(resources_to_template, tpl_vars)
     if args.command == 'template':
         print(templated_resources)
