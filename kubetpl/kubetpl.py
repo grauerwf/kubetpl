@@ -5,19 +5,28 @@ import yaml
 import os
 import sys
 from jinja2 import Template
+from jinja2 import exceptions
 
 
-def get_resource_list(resource_map):
-    def sub(m, res):
-        if type(m) == dict:
-            for k, v in m.items():
-                yield from sub(v, res+[k])
-        elif type(m) == list:
-            for v in m:
-                yield from sub(v, res)
-        else:
-            yield str(os.path.sep).join(res+[m])
-    yield from sub(resource_map, [])
+required_resources_parameters = ['name', 'path', 'include']
+
+
+def get_resource_list(resource_list):
+    def sub(parent, cur_resource_list):
+        for resource in cur_resource_list:
+            if 'name' not in resource and 'path' not in resource:
+                print("Malformed resources set in cluster config, "
+                      "at least one 'name' or 'path' is required")
+            else:
+                if 'path' in resource:
+                    cur_path = os.path.join(parent, resource['path'])
+                else:
+                    cur_path = os.path.join(parent, resource['name'])
+                if 'include' in resource:
+                    yield from sub(cur_path, resource['include'])
+                else:
+                    yield cur_path
+    yield from sub('', resource_list)
 
 
 def parse_args():
@@ -54,36 +63,53 @@ def parse_args():
     return parser.parse_args()
 
 
+def find_resource_location(resource_path):
+    if os.path.isabs(resource_path):
+        return resource_path
+    if os.path.exists(os.path.join(os.getcwd(), resource_path)):
+        return os.path.join(os.getcwd(), resource_path)
+    if os.path.exists(os.path.join(os.path.dirname(args.file), resource_path)):
+        return os.path.join(os.path.dirname(args.file), resource_path)
+    print("Cannot find resource {}, exiting...".format(resource_path))
+    exit(1)
+
+
 def template_resources(resources_list, values):
     templated_resources = ''
     resources_to_template = []
     for resource in resources_list:
-        if not os.path.isabs(resource):
-            resource = os.path.join(os.getcwd(), resource)
-        if os.path.isfile(resource):
-            resources_to_template.append(resource)
-        elif os.path.isdir(resource):
+        resource_location = find_resource_location(resource)
+        if os.path.isfile(resource_location):
+            resources_to_template.append(resource_location)
+        elif os.path.isdir(resource_location):
             resources_to_template.extend(
-                [str(os.path.sep).join([resource, file])
-                 for file in os.listdir(resource)
+                [str(os.path.sep).join([resource_location, file])
+                 for file in os.listdir(resource_location)
                  if file.endswith(".yml")
                  or file.endswith(".yaml")
                  or file.endswith(".json")])
     for resource in resources_to_template:
         with open(resource) as template_file:
-            template = Template(template_file.read())
-            templated_resources += template.render(values) + '\n'
+            try:
+                template = Template(template_file.read())
+                templated_resources += template.render(values) + '\n'
+            except exceptions.TemplateSyntaxError as exc:
+                print("Error templating resource {0}, {1}".format(resource, exc.message))
+                exit(1)
     return templated_resources
+
+
+args = parse_args()
 
 
 def main():
     resources_to_template = []
-    args = parse_args()
     with open(args.file) as resource_set_file:
         resource_set = yaml.load(resource_set_file.read(),
                                  Loader=yaml.SafeLoader)
     tpl_vars = resource_set['global']
     resource_set_resources = list(get_resource_list(resource_set['include']))
+
     if len(args.include) > 0:
         for resource in resource_set_resources:
             if resource in args.include:
