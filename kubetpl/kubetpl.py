@@ -112,12 +112,15 @@ def main():
 
     if len(args.include) > 0:
         for resource in resource_set_resources:
-            if resource in args.include:
-                resources_to_template.append(resource)
+            for include in args.include:
+                if resource.startswith(include):
+                    resources_to_template.append(resource)
     elif len(args.exclude) > 0:
         for resource in resource_set_resources:
-            if resource not in args.exclude:
-                resources_to_template.append(resource)
+            for include in args.exclude:
+                if not resource.startswith(include):
+                    resources_to_template.append(resource)
+
     else:
         resources_to_template = resource_set_resources
     if len(args.vars) > 0:
