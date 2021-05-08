@@ -9,7 +9,7 @@ setuptools.setup(
     version=os.getenv('GITHUB_REF').replace('refs/tags/', ''),
     author="Grauer W01f",
     author_email="grauerwf@gmail.com",
-    description="A templater for kubernetes resources",
+    description="A template tool for kubernetes resources",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/grauerwf/kubtemplate",
