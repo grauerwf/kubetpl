@@ -134,7 +134,8 @@ def main():
             template = Template(str(tpl_vars[var_name]))
             tpl_vars[var_name] = template.render(tpl_vars, aws=aws)
         except Exception as exc:
-            pass
+            print("Error templating variable {0} with error".format(var_name,
+                                                                    exc.args))
 
     for resource in included_resources:
         resource_location = find_resource_location(resource)
