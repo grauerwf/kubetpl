@@ -81,7 +81,7 @@ def template_resources(resources_list, context, values):
         with open(resource) as template_file:
             try:
                 template = Template(template_file.read())
-                templated_resource = template.render(values)
+                templated_resource = template.render(values, aws=aws)
                 if args.command == 'template':
                     print('### File: {0}'.format(resource))
                     print(templated_resource)
