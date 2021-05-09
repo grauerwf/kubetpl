@@ -99,6 +99,7 @@ def template_resources(resources_list, context, values):
                                                                   exc.message))
                 exit(1)
 
+
 args = parse_args()
 
 
