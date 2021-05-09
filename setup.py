@@ -13,7 +13,8 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/grauerwf/kubtemplate",
-    packages=setuptools.find_packages(),
+    package_dir={"": "src"},
+    packages=setuptools.find_packages(where="src"),
     entry_points={
         'console_scripts': [
             'kubetpl=kubetpl.kubetpl:main',
@@ -21,7 +22,8 @@ setuptools.setup(
     },
     install_requires=[
         'Jinja2',
-        'PyYAML'
+        'PyYAML',
+        'boto3'
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
