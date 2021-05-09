@@ -6,6 +6,7 @@ import os
 import sys
 from jinja2 import Template
 from jinja2 import exceptions
+import aws
 
 
 required_resources_parameters = ['name', 'path', 'include']
@@ -128,6 +129,15 @@ def main():
         for var in args.vars:
             (var_key, var_value) = var.split('=')
             tpl_vars[var_key] = var_value
+
+    for var_name in tpl_vars:
+        try:
+            template = Template(str(tpl_vars[var_name]))
+            tpl_vars[var_name] = template.render(tpl_vars, aws=aws)
+        except Exception as exc:
+            print("Error templating variable {0} with error".format(var_name,
+                                                                    exc.args))
+
     for resource in included_resources:
         resource_location = find_resource_location(resource)
         if os.path.isfile(resource_location):
