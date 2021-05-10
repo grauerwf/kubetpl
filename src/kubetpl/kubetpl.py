@@ -6,7 +6,7 @@ import os
 import sys
 from jinja2 import Template
 from jinja2 import exceptions
-import aws
+import src.kubetpl.aws as aws
 
 
 required_resources_parameters = ['name', 'path', 'include']
