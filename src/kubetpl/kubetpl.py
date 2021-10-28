@@ -6,7 +6,7 @@ import os
 import sys
 from jinja2 import Template
 from jinja2 import exceptions
-import kubetpl.aws as aws
+import aws
 
 
 required_resources_parameters = ['name', 'path', 'include']
@@ -105,30 +105,12 @@ args = parse_args()
 
 def main():
     resources_to_template = []
-    included_resources = []
+    available_resources = []
     with open(args.file) as resource_set_file:
         resource_set = yaml.load(resource_set_file.read(),
                                  Loader=yaml.SafeLoader)
     tpl_vars = resource_set['global']
     resource_set_resources = list(get_resource_list(resource_set['include']))
-
-    if len(args.include) > 0:
-        for resource in resource_set_resources:
-            for include in args.include:
-                if resource.startswith(include):
-                    included_resources.append(resource)
-    elif len(args.exclude) > 0:
-        for resource in resource_set_resources:
-            for include in args.exclude:
-                if not resource.startswith(include):
-                    included_resources.append(resource)
-
-    else:
-        included_resources = resource_set_resources
-    if len(args.vars) > 0:
-        for var in args.vars:
-            (var_key, var_value) = var.split('=')
-            tpl_vars[var_key] = var_value
 
     for var_name in tpl_vars:
         try:
@@ -139,17 +121,35 @@ def main():
                   'variable "{0}": {1}'.format(var_name, ' '.join(exc.args)))
             exit(1)
 
-    for resource in included_resources:
+    for resource in resource_set_resources:
         resource_location = find_resource_location(resource)
         if os.path.isfile(resource_location):
-            resources_to_template.append(resource_location)
+            available_resources.append(resource_location)
         elif os.path.isdir(resource_location):
-            resources_to_template.extend(
+            available_resources.extend(
                 [str(os.path.sep).join([resource_location, file])
                  for file in os.listdir(resource_location)
                  if file.endswith(".yml")
                  or file.endswith(".yaml")
                  or file.endswith(".json")])
+
+    if len(args.include) > 0:
+        for resource in available_resources:
+            for include in args.include:
+                if resource.endswith(include):
+                    resources_to_template.append(resource)
+    elif len(args.exclude) > 0:
+        for resource in resource_set_resources:
+            for exclude in args.exclude:
+                if not resource.endswith(exclude):
+                    resources_to_template.append(resource)
+    else:
+        resources_to_template = available_resources
+    if len(args.vars) > 0:
+        for var in args.vars:
+            (var_key, var_value) = var.split('=')
+            tpl_vars[var_key] = var_value
+
     template_resources(resources_to_template, resource_set['context'], tpl_vars)
 
 
