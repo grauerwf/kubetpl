@@ -7,10 +7,12 @@ import sys
 from jinja2 import Template
 from jinja2 import exceptions
 import kubetpl.aws as aws
+import tempfile
 
 
 required_resources_parameters = ['name', 'path', 'include']
-kubectl_cmd_tpl = "cat <<EOF | {1} {2} --context {3} -f - \n{0}\nEOF\n"
+kubectl_cmd_tpl = "{1} {2} --context {3} -f {0}"
+rendered_resource_file = tempfile.NamedTemporaryFile()
 
 
 def get_resource_list(resource_list):
@@ -86,7 +88,8 @@ def template_resources(resources_list, context, values):
                     print('### File: {0}'.format(resource))
                     print(templated_resource)
                 else:
-                    kubectl_cmd = kubectl_cmd_tpl.format(templated_resource,
+                    rendered_resource_file.write(templated_resource.encode())
+                    kubectl_cmd = kubectl_cmd_tpl.format(rendered_resource_file.name,
                                                          args.kubectl_path,
                                                          args.command,
                                                          context)
