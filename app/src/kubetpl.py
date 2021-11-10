@@ -9,10 +9,9 @@ from jinja2 import exceptions
 import kubetpl.aws as aws
 import tempfile
 
-
-required_resources_parameters = ['name', 'path', 'include']
 kubectl_cmd_tpl = "{1} {2} --context {3} -f {0}"
 rendered_resource_file = tempfile.NamedTemporaryFile()
+required_resources_parameters = ['name', 'path', 'include']
 
 
 def get_resource_list(resource_list):
