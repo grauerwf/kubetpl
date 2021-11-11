@@ -4,8 +4,7 @@ import argparse
 import yaml
 import os
 import sys
-from jinja2 import Template
-from jinja2 import exceptions
+from jinja2 import Template, exceptions, StrictUndefined
 import kubetpl.aws as aws
 import tempfile
 
@@ -80,7 +79,8 @@ def template_resources(resources_list, context, values):
     for resource in resources_list:
         with open(resource) as template_file:
             try:
-                template = Template(template_file.read())
+                template = Template(template_file.read(),
+                                    undefined=StrictUndefined)
                 templated_resource = template.render(values, aws=aws)
                 if args.command == 'template':
                     print('### File: {0}'.format(resource))
@@ -97,8 +97,9 @@ def template_resources(resources_list, context, values):
                         if res != 0:
                             print('kubectl error on file {0}'.format(resource))
                             exit(1)
-            except exceptions.TemplateSyntaxError as exc:
-                print("Error templating resource {0}, {1}".format(resource,
+            except (exceptions.TemplateSyntaxError,
+                    exceptions.UndefinedError) as exc:
+                print("Error templating resource {0}: {1}".format(resource,
                                                                   exc.message))
                 exit(1)
 
