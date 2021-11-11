@@ -46,4 +46,4 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: schwarzw01f/kubetpl:latest,schwarzw01f/kubetpl:${{GITHUB_REF_NAME}}
+          tags: schwarzw01f/kubetpl:latest,schwarzw01f/kubetpl:${{env.GITHUB_REF_NAME}}
