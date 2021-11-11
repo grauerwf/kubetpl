@@ -11,5 +11,5 @@ RUN apk --update add openssh python3 git &&  \
     chmod +x /usr/local/bin/aws-iam-authenticator && \
     mkdir -p /root/.ssh && \
     mkdir -p /root/.kube
-ADD entrypoint.sh entrypoint.sh
+ADD entrypoint.sh /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
