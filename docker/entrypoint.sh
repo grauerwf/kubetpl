@@ -1,13 +1,5 @@
 #!/usr/bin/env sh
 
-if [ ! -d ~/.kube ]; then
-  mkdir ~/.kube
-fi
-
-if [ ! -d ~/.ssh ]; then
-  mkdir ~/.ssh
-fi
-
 if [ -z "${KUBE_CONFIG}" ]; then
   echo "KUBE_CONFIG" variable is unset, exiting...
   exit 1
