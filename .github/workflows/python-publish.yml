@@ -30,6 +30,7 @@ jobs:
         twine upload dist/*
   docker:
     runs-on: ubuntu-latest
+    needs: pypi
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -45,4 +46,4 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: schwarzw01f/kubetpl:latest,schwarzw01f/kubetpl:$GITHUB_REF_NAME
+          tags: schwarzw01f/kubetpl:latest,schwarzw01f/kubetpl:${{GITHUB_REF_NAME}}
