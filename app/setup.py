@@ -17,7 +17,7 @@ setuptools.setup(
     packages=setuptools.find_packages(where="src"),
     entry_points={
         'console_scripts': [
-            'kubetpl=kubetpl.kubetpl:main',
+            'kubetpl=kubetpl:main',
         ],
     },
     install_requires=[
