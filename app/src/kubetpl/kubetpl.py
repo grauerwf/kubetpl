@@ -6,7 +6,7 @@ import os
 import sys
 from jinja2 import Template
 from jinja2 import exceptions
-import aws
+import kubetpl.aws as aws
 import tempfile
 
 kubectl_cmd_tpl = "{1} {2} --context {3} -f {0}"
