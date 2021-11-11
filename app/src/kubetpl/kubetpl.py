@@ -10,7 +10,6 @@ import kubetpl.aws as aws
 import tempfile
 
 kubectl_cmd_tpl = "{1} {2} --context {3} -f {0}"
-rendered_resource_file = tempfile.NamedTemporaryFile()
 required_resources_parameters = ['name', 'path', 'include']
 
 
@@ -68,11 +67,11 @@ def parse_args():
 
 def find_resource_location(resource_path):
     if os.path.isabs(resource_path):
-        return resource_path
+        return '.', resource_path
     if os.path.exists(os.path.join(os.getcwd(), resource_path)):
-        return os.path.join(os.getcwd(), resource_path)
+        return os.getcwd(), resource_path
     if os.path.exists(os.path.join(os.path.dirname(args.file), resource_path)):
-        return os.path.join(os.path.dirname(args.file), resource_path)
+        return os.path.dirname(args.file), resource_path
     print("Cannot find resource {}, exiting...".format(resource_path))
     exit(1)
 
@@ -87,15 +86,17 @@ def template_resources(resources_list, context, values):
                     print('### File: {0}'.format(resource))
                     print(templated_resource)
                 else:
-                    rendered_resource_file.write(templated_resource.encode())
-                    kubectl_cmd = kubectl_cmd_tpl.format(rendered_resource_file.name,
-                                                         args.kubectl_path,
-                                                         args.command,
-                                                         context)
-                    res = os.system(kubectl_cmd)
-                    if res != 0:
-                        print('kubectl error on file {0}'.format(resource))
-                        exit(1)
+                    with tempfile.NamedTemporaryFile() as rendered_res_file:
+                        rendered_res_file.write(templated_resource.encode())
+                        rendered_res_file.flush()
+                        kubectl_cmd = kubectl_cmd_tpl.format(rendered_res_file.name,
+                                                             args.kubectl_path,
+                                                             args.command,
+                                                             context)
+                        res = os.system(kubectl_cmd)
+                        if res != 0:
+                            print('kubectl error on file {0}'.format(resource))
+                            exit(1)
             except exceptions.TemplateSyntaxError as exc:
                 print("Error templating resource {0}, {1}".format(resource,
                                                                   exc.message))
@@ -125,12 +126,14 @@ def main():
 
     for resource in resource_set_resources:
         resource_location = find_resource_location(resource)
-        if os.path.isfile(resource_location):
+        resource_fs_location = os.path.join(resource_location[0],
+                                            resource_location[1])
+        if os.path.isfile(resource_fs_location):
             available_resources.append(resource_location)
-        elif os.path.isdir(resource_location):
+        elif os.path.isdir(resource_fs_location):
             available_resources.extend(
-                [str(os.path.sep).join([resource_location, file])
-                 for file in os.listdir(resource_location)
+                [str(os.path.sep).join([resource_location[1], file])
+                 for file in os.listdir(resource_fs_location)
                  if file.endswith(".yml")
                  or file.endswith(".yaml")
                  or file.endswith(".json")])
@@ -138,12 +141,12 @@ def main():
     if len(args.include) > 0:
         for resource in available_resources:
             for include in args.include:
-                if resource.endswith(include):
+                if resource.startswith(include):
                     resources_to_template.append(resource)
     elif len(args.exclude) > 0:
         for resource in resource_set_resources:
             for exclude in args.exclude:
-                if not resource.endswith(exclude):
+                if not resource.startswith(exclude):
                     resources_to_template.append(resource)
     else:
         resources_to_template = available_resources
