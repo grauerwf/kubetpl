@@ -156,7 +156,12 @@ def main():
             (var_key, var_value) = var.split('=')
             tpl_vars[var_key] = var_value
 
-    template_resources(resources_to_template, resource_set['context'], tpl_vars)
+    if len(resources_to_template) > 0:
+        template_resources(resources_to_template, resource_set['context'], tpl_vars)
+    else:
+        print('No resources to template has been found, '
+              'please check including/excluding settings or '
+              'resources list in cluster config ')
 
 
 if __name__ == '__main__':
