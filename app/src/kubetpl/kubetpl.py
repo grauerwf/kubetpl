@@ -100,7 +100,7 @@ def template_resources(resources_list, context, values):
                             exit(1)
             except (exceptions.TemplateSyntaxError,
                     exceptions.UndefinedError) as exc:
-                print("Error templating resource {0}: {1}".format(resource,
+                print('Error templating resource "{0}": {1}'.format(resource,
                                                                   exc.message))
                 exit(1)
 
