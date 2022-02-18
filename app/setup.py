@@ -23,7 +23,8 @@ setuptools.setup(
     install_requires=[
         'Jinja2',
         'PyYAML',
-        'boto3'
+        'boto3',
+        'google-cloud-secret-manager'
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
