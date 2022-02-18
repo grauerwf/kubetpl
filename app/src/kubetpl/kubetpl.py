@@ -6,6 +6,7 @@ import os
 import sys
 from jinja2 import Template, exceptions, StrictUndefined
 import kubetpl.aws as aws
+import kubetpl.gcp as gcp
 import tempfile
 
 kubectl_cmd_tpl = "{1} {2} --context {3} -f {0}"
@@ -81,7 +82,7 @@ def template_resources(resources_list, context, values):
             try:
                 template = Template(template_file.read(),
                                     undefined=StrictUndefined)
-                templated_resource = template.render(values, aws=aws)
+                templated_resource = template.render(values, aws=aws, gcp=gcp)
                 if args.command == 'template':
                     print('### File: {0}'.format(resource))
                     print(templated_resource)
@@ -119,7 +120,7 @@ def main():
     for var_name in tpl_vars:
         try:
             template = Template(str(tpl_vars[var_name]))
-            tpl_vars[var_name] = template.render(tpl_vars, aws=aws)
+            tpl_vars[var_name] = template.render(tpl_vars, aws=aws, gcp=gcp)
         except Exception as exc:
             print('Error templating '
                   'variable "{0}": {1}'.format(var_name, ' '.join(exc.args)))
@@ -156,7 +157,12 @@ def main():
             (var_key, var_value) = var.split('=')
             tpl_vars[var_key] = var_value
 
-    template_resources(resources_to_template, resource_set['context'], tpl_vars)
+    if len(resources_to_template) > 0:
+        template_resources(resources_to_template, resource_set['context'], tpl_vars)
+    else:
+        print('No resources to template has been found, '
+              'please check including/excluding settings or '
+              'resources list in cluster config ')
 
 
 if __name__ == '__main__':
