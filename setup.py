@@ -1,7 +1,7 @@
 import setuptools
 import os
 
-with open("../README.md", "r", encoding="utf-8") as fh:
+with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
@@ -12,9 +12,9 @@ setuptools.setup(
     description="A template tool for kubernetes resources",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/grauerwf/kubtemplate",
+    url="https://github.com/grauerwf/kubetpl",
     package_dir={"": "src"},
-    packages=setuptools.find_packages(where="app/src"),
+    packages=setuptools.find_packages(),
     entry_points={
         'console_scripts': [
             'kubetpl=kubetpl.kubetpl:main',
