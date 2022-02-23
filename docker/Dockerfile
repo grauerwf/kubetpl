@@ -11,7 +11,7 @@ RUN apt update -y && apt install -y openssh-client python3 python3-dev python3-p
     chmod +x /usr/local/bin/aws-iam-authenticator && \
     wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-373.0.0-linux-x86_64.tar.gz && \
     tar -xf google-cloud-sdk-373.0.0-linux-x86_64.tar.gz && \
-    ./google-cloud-sdk/install.sh --help
+    ./google-cloud-sdk/install.sh
 #    mkdir -p /root/.ssh && \
 #    mkdir -p /root/.kube
 #ADD docker/entrypoint.sh /entrypoint.sh
