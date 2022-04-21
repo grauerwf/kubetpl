@@ -1,4 +1,4 @@
 Jinja2
 PyYAML
-boto3
 google-cloud-secret-manager
+boto3
