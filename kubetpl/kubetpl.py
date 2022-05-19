@@ -131,7 +131,7 @@ def main():
         resource_fs_location = os.path.join(resource_location[0],
                                             resource_location[1])
         if os.path.isfile(resource_fs_location):
-            available_resources.append(resource_location)
+            available_resources.append(resource_fs_location)
         elif os.path.isdir(resource_fs_location):
             available_resources.extend(
                 [str(os.path.sep).join([resource_location[1], file])
