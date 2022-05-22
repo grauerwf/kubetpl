@@ -67,7 +67,7 @@ def parse_args():
 
 def find_resource_location(resource_path):
     if os.path.isabs(resource_path):
-        return '.', resource_path
+        return '', resource_path
     if os.path.exists(os.path.join(os.getcwd(), resource_path)):
         return os.getcwd(), resource_path
     if os.path.exists(os.path.join(os.path.dirname(args.file), resource_path)):
@@ -128,8 +128,7 @@ def main():
 
     for resource in resource_set_resources:
         resource_location = find_resource_location(resource)
-        resource_fs_location = os.path.join(resource_location[0],
-                                            resource_location[1])
+        resource_fs_location = os.path.join(resource_location[0], resource_location[1]) if resource_location[0] != os.getcwd() else resource_location[1]
         if os.path.isfile(resource_fs_location):
             available_resources.append(resource_fs_location)
         elif os.path.isdir(resource_fs_location):
