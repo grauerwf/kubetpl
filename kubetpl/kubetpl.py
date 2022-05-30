@@ -71,20 +71,21 @@ def find_resource_location(resource_path):
     if os.path.exists(os.path.join(os.getcwd(), resource_path)):
         return os.getcwd(), resource_path
     if os.path.exists(os.path.join(os.path.dirname(args.file), resource_path)):
-        return os.path.dirname(args.file), resource_path
+        return os.path.dirname(os.path.abspath(args.file)), resource_path
     print("Cannot find resource {}, exiting...".format(resource_path))
     exit(1)
 
 
 def template_resources(resources_list, context, values):
     for resource in resources_list:
-        with open(resource) as template_file:
+        resource_file = str(os.path.sep).join(resource)
+        with open(resource_file) as template_file:
             try:
                 template = Template(template_file.read(),
                                     undefined=StrictUndefined)
                 templated_resource = template.render(values, aws=aws, gcp=gcp)
                 if args.command == 'template':
-                    print('### File: {0}'.format(resource))
+                    print('### File: {0}'.format(resource_file))
                     print(templated_resource)
                 else:
                     with tempfile.NamedTemporaryFile() as rendered_res_file:
@@ -128,12 +129,13 @@ def main():
 
     for resource in resource_set_resources:
         resource_location = find_resource_location(resource)
+        resource_full_path = os.path.join(resource_location[0], resource_location[1])
         resource_fs_location = os.path.join(resource_location[0], resource_location[1]) if resource_location[0] != os.getcwd() else resource_location[1]
-        if os.path.isfile(resource_fs_location):
-            available_resources.append(resource_fs_location)
-        elif os.path.isdir(resource_fs_location):
+        if os.path.isfile(resource_full_path):
+            available_resources.append(resource_location)
+        elif os.path.isdir(resource_full_path):
             available_resources.extend(
-                [str(os.path.sep).join([resource_location[1], file])
+                [(resource_location[0], str(os.path.sep).join([resource_location[1],file]))
                  for file in os.listdir(resource_fs_location)
                  if file.endswith(".yml")
                  or file.endswith(".yaml")
@@ -142,7 +144,7 @@ def main():
     if len(args.include) > 0:
         for resource in available_resources:
             for include in args.include:
-                if resource.startswith(include):
+                if resource[1].startswith(include):
                     resources_to_template.append(resource)
     elif len(args.exclude) > 0:
         for resource in resource_set_resources:
