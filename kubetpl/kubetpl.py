@@ -121,7 +121,7 @@ def main():
     for var_name in tpl_vars:
         try:
             template = Template(str(tpl_vars[var_name]))
-            tpl_vars[var_name] = template.render(tpl_vars, aws=aws, gcp=gcp)
+            tpl_vars[var_name] = template.render(tpl_vars, aws=aws)
         except Exception as exc:
             print('Error templating '
                   'variable "{0}": {1}'.format(var_name, ' '.join(exc.args)))
