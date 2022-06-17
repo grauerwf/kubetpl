@@ -5,7 +5,7 @@ import yaml
 import os
 import sys
 from jinja2 import Template, exceptions, StrictUndefined
-import kubetpl.aws as aws
+import aws as aws
 # import kubetpl.gcp as gcp
 import tempfile
 
@@ -88,20 +88,23 @@ def template_resources(resources_list, context, values):
                     print('### File: {0}'.format(resource_file))
                     print(templated_resource)
                 else:
-                    with tempfile.NamedTemporaryFile() as rendered_res_file:
-                        rendered_res_file.write(templated_resource.encode())
-                        rendered_res_file.flush()
-                        kubectl_cmd = kubectl_cmd_tpl.format(rendered_res_file.name,
+                    with tempfile.TemporaryDirectory() as temp_dir:
+                        rendered_res_file_name = os.path.join(temp_dir,
+                                                              os.path.basename(resource_file))
+                        with open(rendered_res_file_name, 'w+b') as rendered_res_file:
+                            rendered_res_file.write(templated_resource.encode())
+                            rendered_res_file.flush()
+                        kubectl_cmd = kubectl_cmd_tpl.format(rendered_res_file_name,
                                                              args.kubectl_path,
                                                              args.command,
                                                              context)
                         res = os.system(kubectl_cmd)
                         if res != 0:
-                            print('kubectl error on file {0}'.format(resource))
+                            print('kubectl error on file {0}'.format(resource_file))
                             exit(1)
             except (exceptions.TemplateSyntaxError,
                     exceptions.UndefinedError) as exc:
-                print('Error templating resource "{0}": {1}'.format(resource,
+                print('Error templating resource "{0}": {1}'.format(resource_file,
                                                                   exc.message))
                 exit(1)
 
