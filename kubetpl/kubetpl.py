@@ -5,7 +5,7 @@ import yaml
 import os
 import sys
 from jinja2 import Template, exceptions, StrictUndefined
-import aws as aws
+import kubetpl.aws as aws
 # import kubetpl.gcp as gcp
 import tempfile
 
