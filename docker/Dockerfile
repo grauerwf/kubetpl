@@ -1,4 +1,4 @@
-FROM debian:bullseye
+FROM ubuntu:22.04
 MAINTAINER grauerwf <grauerwf@gmail.com>
 
 RUN apt update -y && apt install -y openssh-client python3 python3-dev python3-pip git gcc cargo wget curl &&  \
