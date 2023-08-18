@@ -33,8 +33,6 @@ jobs:
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
-        with:
-          platforms: arm64
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
@@ -49,3 +47,4 @@ jobs:
           push: true
           file: docker/Dockerfile
           tags: schwarzw01f/kubetpl:latest
+          platforms: linux/amd64,linux/arm64
